@@ -1,3 +1,4 @@
+# in future this dictionary will contain all main information about elements
 atom_masses = {
     'H' : 1.008,
     'He' : 4.003,
