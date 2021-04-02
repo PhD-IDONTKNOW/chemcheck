@@ -87,3 +87,4 @@ atom_masses = {
     'At': (210, 'Astatine'),
     'Rn': (222.018, 'Radon')
 }
+

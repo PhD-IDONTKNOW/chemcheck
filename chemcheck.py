@@ -33,41 +33,44 @@ def flags(user_in):
         print('Unknown flag. Use [-help] to get help.')
 
 
-def molar_calc(formatted_compound):  # this function find molar mass of formatted compound without brackets
+def molar_calc(no_brackets):  # this function find molar mass of formatted compound without brackets
     f_molar_mass = 0
     # Check if compound could be
-    if not formatted_compound[:1] in atom_masses and not formatted_compound[:2] in atom_masses:
+    if not no_brackets[:1] in atom_masses and not no_brackets[:2] in atom_masses:
         print("This compound does not exist! ")
     else:
-        for k in range(len(formatted_compound)):
+        for k in range(len(no_brackets)):
             # if element in compound consist of 2 letters (like Li, He, Fe etc.)
-            if formatted_compound[k:2 + k] in atom_masses:
-                if formatted_compound[k + 2:3 + k] in list('123456789'):  # check if element has index
-                    f_molar_mass += int(formatted_compound[k + 2:3 + k]) * atom_masses[formatted_compound[k:2 + k]][0]
+            if no_brackets[k:2 + k] in atom_masses:
+                if no_brackets[k + 2:3 + k] in list('123456789'):  # check if element has index
+                    f_molar_mass += int(no_brackets[k + 2:3 + k]) * atom_masses[no_brackets[k:2 + k]][0]
                 else:
-                    f_molar_mass += atom_masses[formatted_compound[k:2 + k]][0]
+                    f_molar_mass += atom_masses[no_brackets[k:2 + k]][0]
                 k += 1
-            elif formatted_compound[
+            elif no_brackets[
                  k:1 + k] in atom_masses:  # if element in compound consist of 1 letter (like H, C, N, O etc.)
-                if formatted_compound[k + 1:2 + k] in list('123456789'):  # check if element has index
-                    f_molar_mass += int(formatted_compound[k + 1:2 + k]) * atom_masses[formatted_compound[k:1 + k]][0]
+                if no_brackets[k + 1:2 + k] in list('123456789'):  # check if element has index
+                    f_molar_mass += int(no_brackets[k + 1:2 + k]) * atom_masses[no_brackets[k:1 + k]][0]
                 else:
-                    f_molar_mass += atom_masses[formatted_compound[k:1 + k]][0]
+                    f_molar_mass += atom_masses[no_brackets[k:1 + k]][0]
     return round(f_molar_mass, 3)  # return rounded to 3 digits molar mass of formatted compound
 
 
-# this function separate input compound to in bracket piece and un bracket piece
-def compound_separator(no_flags_input):
-    out_brackets_piece = ''
+# this function separate input compound to bracket part and un bracket part
+def separator(no_flags):
     # find parentheses
-    first_brackets_pos, second_brackets_pos = no_flags_input.find('('), no_flags_input.find(')')
-    brackets_piece = no_flags_input[first_brackets_pos + 1:second_brackets_pos]
-    if first_brackets_pos == 0:  # if brackets piece in front of compound like (NH4)2SO4
-        out_brackets_piece = no_flags_input[second_brackets_pos + 2:]
-    if second_brackets_pos == len(no_flags_input) - 2:  # if brackets piece in end of compound like Fe(NO3)3
-        out_brackets_piece = no_flags_input[:first_brackets_pos]
-    brackets_coif = no_flags_input[second_brackets_pos + 1]
-    return out_brackets_piece, brackets_piece, brackets_coif
+    first_bracket, second_bracket = no_flags.find('('), no_flags.find(')')
+    # check is coefficient does exist
+    is_coef = len(no_flags) > second_bracket + 1 and no_flags[second_bracket + 1] in '123456789'
+    # save bracket part
+    brackets_part = no_flags[first_bracket + 1:second_bracket]
+    # search coefficient
+    coefficient = no_flags[second_bracket + 1] if is_coef else 1
+    # search out bracket part
+    out_brackets_part = no_flags[:first_bracket] + no_flags[second_bracket + 2:] if \
+        is_coef else \
+        no_flags[:first_bracket] + no_flags[second_bracket + 1:]
+    return out_brackets_part, brackets_part, int(coefficient)
 
 
 while True:
@@ -76,8 +79,9 @@ while True:
     if compound == 'exit':  # exit function
         break
     elif '-' in compound:  # call flags function
-        flags(compound);
+        flags(compound)
     elif '(' in compound and ')' in compound:  # if we have brackets in compound
-        print(f'Molar mass of {compound} is ')
+        molar_mass = molar_calc(separator(compound)[0]) + molar_calc(separator(compound)[1]) * separator(compound)[2]
+        print(f'Molar mass of {compound} is {molar_mass}')
     else:  # if we do not have brackets in compound
         print(f'Molar mass of {compound} is {molar_calc(compound)}')
